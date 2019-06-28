@@ -9,9 +9,11 @@ defmodule RockPaperScissors.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      RockPaperScissorsWeb.Endpoint
-      # Starts a worker by calling: RockPaperScissors.Worker.start_link(arg)
-      # {RockPaperScissors.Worker, arg},
+      RockPaperScissorsWeb.Endpoint,
+      # Create a dynamic supervisor to control the individual game GenServers
+      {DynamicSupervisor, strategy: :one_for_one, name: RockPaperScissors.GamesSupervisor},
+      # Create a registry to allow to look up for game GenServers using its string name
+      Registry.child_spec(keys: :unique, name: RockPaperScissors.GamesRegistry)
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

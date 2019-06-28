@@ -2,6 +2,7 @@ defmodule RockPaperScissors.GameServer do
   use GenServer
 
   alias RockPaperScissors.GameStatus
+  alias RockPaperScissors.GamesRegistry
 
   # Client API
 
@@ -11,7 +12,13 @@ defmodule RockPaperScissors.GameServer do
       |> Keyword.take([:name, :playerA, :playerB])
       |> Enum.into(%{})
 
-    GenServer.start_link(__MODULE__, casted_opts)
+    process_name = {
+      :via, 
+      Registry, 
+      {GamesRegistry, casted_opts[:name]}
+    }
+
+    GenServer.start_link(__MODULE__, casted_opts, [name: process_name])
   end
 
   def choose(game_pid, :playerA, choice) do
