@@ -6,6 +6,14 @@ defmodule RockPaperScissors.GameServer do
 
   # Client API
 
+  def child_spec(opts) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [opts]},
+      restart: :transient
+    }
+  end
+
   def start_link(game_opts) do
     casted_opts = 
       game_opts

@@ -19,7 +19,6 @@ defmodule RockPaperScissors do
       playerB: playerB
     ]
 
-    # TODO: Improve this to make the state transient; otherwise the server process is restarted after stopping
     {:ok, _} = DynamicSupervisor.start_child(GamesSupervisor, {GameServer, game_opts})
   end
 
