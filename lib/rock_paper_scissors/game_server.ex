@@ -15,14 +15,14 @@ defmodule RockPaperScissors.GameServer do
   end
 
   def start_link(game_opts) do
-    casted_opts = 
+    casted_opts =
       game_opts
       |> Keyword.take([:name, :playerA, :playerB])
       |> Enum.into(%{})
 
     process_name = {
-      :via, 
-      Registry, 
+      :via,
+      Registry,
       {GamesRegistry, casted_opts[:name]}
     }
 
@@ -39,6 +39,11 @@ defmodule RockPaperScissors.GameServer do
   def choices(game_pid), do:  GenServer.call(game_pid, :choices)
 
   def status(game_pid), do:  GenServer.call(game_pid, :status)
+
+  def name(game_pid), do: GenServer.call(game_pid, :name)
+
+  def winner(game_pid), do: GenServer.call(game_pid, :winner)
+
 
 
 
@@ -70,6 +75,16 @@ defmodule RockPaperScissors.GameServer do
   @impl true
   def handle_call(:status, _from, game_status) do
     {:reply, game_status, game_status}
+  end
+
+  @impl true
+  def handle_call(:name, _from, game_status) do
+    {:reply, game_status.name, game_status}
+  end
+
+  @impl true
+  def handle_call(:winner, _from, game_status) do
+    {:reply, game_status.winner, game_status}
   end
 
 end
