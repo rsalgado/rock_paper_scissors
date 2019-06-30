@@ -1,4 +1,6 @@
 defmodule RockPaperScissors.GameStatus do
+
+  @derive Jason.Encoder
   defstruct [
     name: "",
     playerA: nil,
