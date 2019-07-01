@@ -1,1 +1,13 @@
-<%= "Implement games/new template here" %>
+<h2>Create Game</h2>
+
+<%= form_for @conn, game_path(@conn, :create), [as: :game], fn f -> %>
+  <label>
+    Name:
+    <%= text_input f, :name,
+                      placeholder: "some_random_name",
+                      required: true,
+                      autofocus: true %>
+  </label>
+  <%= submit "Create" %>
+
+<% end %>

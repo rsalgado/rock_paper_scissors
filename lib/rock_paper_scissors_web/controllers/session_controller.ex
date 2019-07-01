@@ -12,16 +12,16 @@ defmodule RockPaperScissorsWeb.SessionController do
     conn
     |> delete_session(:return_to)
     |> put_session(:current_user, user_name)
+    |> put_flash(:info, "Welcome #{user_name}")
     |> redirect(to: return_path)
-    |> put_flash(info: "Welcome #{user_name}")
     |> halt()
   end
 
   def delete(conn, _params) do
     conn
     |> delete_session(:current_user)
+    |> put_flash(:info, "Goodbye!")
     |> redirect(to: "/")
-    |> put_flash(info: "Goodbye!")
     |> halt()
   end
 end

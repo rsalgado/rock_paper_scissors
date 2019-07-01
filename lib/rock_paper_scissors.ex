@@ -16,7 +16,10 @@ defmodule RockPaperScissors do
   Create a new game `GameServer` process with the given name and players
   """
   def new_game(game_name) do
-    {:ok, _} = DynamicSupervisor.start_child(GamesSupervisor, {GameServer, game_name})
+    case DynamicSupervisor.start_child(GamesSupervisor, {GameServer, game_name}) do
+      {:ok, pid} -> {:ok, pid}
+      otherwise -> {:error, inspect(otherwise)}
+    end
   end
 
   @spec find_game(String.t) :: (pid | nil)
