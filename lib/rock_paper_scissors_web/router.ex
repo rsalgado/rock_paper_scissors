@@ -16,7 +16,10 @@ defmodule RockPaperScissorsWeb.Router do
   scope "/", RockPaperScissorsWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    get "/", GameController, :new
+
+    resources "/games", GameController, only: [:new, :create, :show]
+    resources "/sessions", SessionController, only: [:new, :create, :delete], singleton: true
   end
 
   # Other scopes may use custom stacks.
