@@ -7,7 +7,8 @@ defmodule RockPaperScissorsWeb.GameController do
 
 
   def new(conn, _params) do
-    render(conn, "new.html")
+    user_name = get_session(conn, :current_user)
+    render(conn, "new.html", user_name: user_name)
   end
 
   def create(conn, _params) do

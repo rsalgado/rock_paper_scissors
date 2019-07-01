@@ -1,1 +1,13 @@
-<%= "Put the sessions/new template implementation here" %>
+<h1>Welcome</h1>
+<h2>Please enter your name to continue</h2>
+
+<%= form_for @conn, session_path(@conn, :create), [as: :user], fn f -> %>
+  <label>
+    Name:
+    <%= text_input f, :name,
+                      placeholder: "Alice",
+                      required: true,
+                      autofocus: true %>
+    <%= submit "Enter" %>
+  </label>
+<% end %>
