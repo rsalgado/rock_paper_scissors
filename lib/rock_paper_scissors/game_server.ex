@@ -1,90 +1,87 @@
 defmodule RockPaperScissors.GameServer do
   use GenServer
 
-  alias RockPaperScissors.GameStatus
+  alias RockPaperScissors.GameState
   alias RockPaperScissors.GamesRegistry
 
   # Client API
 
-  def child_spec(opts) do
+  def child_spec(game_name) do
     %{
       id: __MODULE__,
-      start: {__MODULE__, :start_link, [opts]},
+      start: {__MODULE__, :start_link, [game_name]},
       restart: :transient
     }
   end
 
-  def start_link(game_opts) do
-    casted_opts =
-      game_opts
-      |> Keyword.take([:name, :playerA, :playerB])
-      |> Enum.into(%{})
-
+  def start_link(game_name) do
     process_name = {
       :via,
       Registry,
-      {GamesRegistry, casted_opts[:name]}
+      {GamesRegistry, game_name}
     }
 
-    GenServer.start_link(__MODULE__, casted_opts, [name: process_name])
+    GenServer.start_link(__MODULE__, game_name, [name: process_name])
   end
 
-  def choose(game_pid, :playerA, choice) do
-    GenServer.call(game_pid, {:choose, :playerA, choice})
-  end
-  def choose(game_pid, :playerB, choice) do
-    GenServer.call(game_pid, {:choose, :playerB, choice})
+  def state(game_pid) do
+    GenServer.call(game_pid, :state)
   end
 
-  def choices(game_pid), do:  GenServer.call(game_pid, :choices)
+  def name(game_pid) do
+    state(game_pid) |> Map.get(:name)
+  end
 
-  def status(game_pid), do:  GenServer.call(game_pid, :status)
+  def status(game_pid) do
+    state(game_pid) |> Map.get(:status)
+  end
 
-  def name(game_pid), do: GenServer.call(game_pid, :name)
+  def winner(game_pid) do
+    state(game_pid) |> Map.get(:winner)
+  end
 
-  def winner(game_pid), do: GenServer.call(game_pid, :winner)
+  def choose(game_pid, player, choice) do
+    GenServer.call(game_pid, {:choose, player, choice})
+  end
 
+  def set_host(game_pid, name) do
+    GenServer.call(game_pid, {:set_host, name})
+  end
 
+  def set_guest(game_pid, name) do
+    GenServer.call(game_pid, {:set_guest, name})
+  end
 
 
   # Server (callbacks)
 
   @impl true
-  def init(opts) do
-    initial_status = Map.merge(%GameStatus{}, opts)
+  def init(game_name) do
+    initial_status = %GameState{name: game_name}
 
     {:ok, initial_status}
   end
 
   @impl true
-  def handle_call({:choose, player, choice}, _from, game_status) do
-    game_status =
-      game_status
-      |> GameStatus.set_choice(player, choice)
-      |> GameStatus.update_state()
-      |> GameStatus.run_rules()
-
-    {:reply, game_status.state, game_status}
+  def handle_call(:state, _from, game_state) do
+    {:reply, game_state, game_state}
   end
 
   @impl true
-  def handle_call(:choices, _from, game_status) do
-    {:reply, game_status.choices, game_status}
+  def handle_call({:choose, player, choice}, _from, game_state) do
+    new_state = GameState.set_choice(game_state, player, choice)
+    {:reply, new_state, new_state}
   end
 
   @impl true
-  def handle_call(:status, _from, game_status) do
-    {:reply, game_status, game_status}
+  def handle_call({:set_host, name}, _from, game_state) do
+    new_state = GameState.set_host(game_state, name)
+    {:reply, new_state, new_state}
   end
 
   @impl true
-  def handle_call(:name, _from, game_status) do
-    {:reply, game_status.name, game_status}
+  def handle_call({:set_guest, name}, _from, game_state) do
+    new_state = GameState.set_guest(game_state, name)
+    {:reply, new_state, new_state}
   end
-
-  @impl true
-  def handle_call(:winner, _from, game_status) do
-    {:reply, game_status.winner, game_status}
-  end
-
 end

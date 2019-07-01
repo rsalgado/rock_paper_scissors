@@ -12,18 +12,11 @@ defmodule RockPaperScissors do
   alias RockPaperScissors.GamesRegistry
 
 
-  @spec new_game(String.t, String.t, String.t) :: {:ok, pid}
   @doc """
   Create a new game `GameServer` process with the given name and players
   """
-  def new_game(name, playerA, playerB) do
-    game_opts = [
-      name: name,
-      playerA: playerA,
-      playerB: playerB
-    ]
-
-    {:ok, _} = DynamicSupervisor.start_child(GamesSupervisor, {GameServer, game_opts})
+  def new_game(game_name) do
+    {:ok, _} = DynamicSupervisor.start_child(GamesSupervisor, {GameServer, game_name})
   end
 
   @spec find_game(String.t) :: (pid | nil)
