@@ -17,7 +17,7 @@ defmodule RockPaperScissorsWeb.SessionController do
     |> delete_session(:return_to)
     |> put_session(:current_user, player)
     |> put_flash(:info, "Welcome #{player.name}")
-    |> redirect(to: return_path)
+    |> redirect(to: return_path || "/")
     |> halt()
   end
 

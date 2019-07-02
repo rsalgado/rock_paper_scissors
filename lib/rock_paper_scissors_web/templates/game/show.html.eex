@@ -1,0 +1,5 @@
+<h2>Game <span class="game-name"><%= @game_name %></span></h2>
+
+<%= content_tag(:div, id: "game-app", data: [game_name: @game_name]) do %>
+
+<% end %>

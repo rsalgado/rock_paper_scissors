@@ -1,13 +1,18 @@
 defmodule RockPaperScissorsWeb.GameChannel do
   use RockPaperScissorsWeb, :channel
+  alias RockPaperScissors.GameServer
 
-  # def join("game:lobby", payload, socket) do
-  #   if authorized?(payload) do
-  #     {:ok, socket}
-  #   else
-  #     {:error, %{reason: "unauthorized"}}
-  #   end
-  # end
+
+  def join("games:"<>game_name, _payload, socket) do
+    game = RockPaperScissors.find_game(game_name)
+    socket = assign(socket, :game, game)
+
+    if authorized?(socket) do
+      {:ok, socket}
+    else
+      {:error, %{reason: "unauthorized"}}
+    end
+  end
 
   # def join("game:"<>game_name, %{"role" => role}, socket) do
   #   if valid_role?(role) do
@@ -46,16 +51,17 @@ defmodule RockPaperScissorsWeb.GameChannel do
   # end
 
 
-  # # Channels can be used in a request/response fashion
-  # # by sending replies to requests from the client
-  # def handle_in("ping", payload, socket) do
-  #   {:reply, {:ok, payload}, socket}
-  # end
+  # Channels can be used in a request/response fashion
+  # by sending replies to requests from the client
+  def handle_in("ping", payload, socket) do
+    {:reply, {:ok, payload}, socket}
+  end
 
-  # # Add authorization logic here as required.
-  # defp authorized?(_payload) do
-  #   true
-  # end
-
-  # defp valid_role?(role), do: role in ["playerA", "playerB"]
+  # Add authorization logic here as required.
+  defp authorized?(socket) do
+    game = socket.assigns.game
+    player = socket.assigns.player
+    
+    player.id in GameServer.players_ids(game)
+  end
 end

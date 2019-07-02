@@ -38,7 +38,8 @@ defmodule RockPaperScissorsWeb.GameController do
 
     if game && game_player?(game, conn) do
       state = GameServer.state(game)
-      json(conn, state)
+
+      render(conn, "show.html", game_name: game_name)
     else
       conn
       |> put_view(ErrorView)

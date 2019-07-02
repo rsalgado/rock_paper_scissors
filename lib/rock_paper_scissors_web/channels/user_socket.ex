@@ -1,24 +1,21 @@
 defmodule RockPaperScissorsWeb.UserSocket do
   use Phoenix.Socket
+  require Logger
 
   ## Channels
-  # channel "room:*", RockPaperScissorsWeb.RoomChannel
-  channel "game:*", RockPaperScissorsWeb.GameChannel
+  channel "games:*", RockPaperScissorsWeb.GameChannel
 
-  # Socket params are passed from the client and can
-  # be used to verify and authenticate a user. After
-  # verification, you can put default assigns into
-  # the socket that will be set for all channels, ie
-  #
-  #     {:ok, assign(socket, :user_id, verified_user_id)}
-  #
-  # To deny connection, return `:error`.
-  #
-  # See `Phoenix.Token` documentation for examples in
-  # performing token verification on connect.
-  def connect(%{"username" => username}, socket, _connect_info) do
-    socket = assign(socket, :username, username)
-    {:ok, socket}
+  def connect(%{"token" => token}, socket, _connect_info) do
+    one_week = 60 * 60 * 24 * 7
+    
+    case Phoenix.Token.verify(socket, "user socket", token, max_age: one_week) do
+      {:ok, player} ->
+        {:ok, assign(socket, :player, player)}
+
+      {:error, reason} ->
+        Logger.error("Socket's token verification failed: #{reason}")
+        :error
+    end
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
