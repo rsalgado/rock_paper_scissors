@@ -40,8 +40,8 @@ defmodule RockPaperScissors.GameServer do
     state(game_pid) |> Map.get(:winner)
   end
 
-  def choose(game_pid, player, choice) do
-    GenServer.call(game_pid, {:choose, player, choice})
+  def choose(game_pid, role, choice) do
+    GenServer.call(game_pid, {:choose, role, choice})
   end
 
   def set_host(game_pid, name) do
@@ -68,8 +68,8 @@ defmodule RockPaperScissors.GameServer do
   end
 
   @impl true
-  def handle_call({:choose, player, choice}, _from, game_state) do
-    new_state = GameState.set_choice(game_state, player, choice)
+  def handle_call({:choose, role, choice}, _from, game_state) do
+    new_state = GameState.set_choice(game_state, role, choice)
     {:reply, new_state, new_state}
   end
 

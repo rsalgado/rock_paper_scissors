@@ -1,8 +1,3 @@
-defmodule RockPaperScissors.Player do
-  @derive Jason.Encoder
-  defstruct name: :none, choice: :none
-end
-
 defmodule RockPaperScissors.GameState do
   require Logger
   alias RockPaperScissors.Player
@@ -16,33 +11,37 @@ defmodule RockPaperScissors.GameState do
     players: %{
       host: %Player{},
       guest: %Player{}
+    },
+    choices: %{
+      host: :none,
+      guest: :none,
     }
   ]
 
   @valid_roles [:guest, :host]
   @valid_choices [:none, :rock, :paper, :scissors]
 
-  def set_host(%GameState{} = state, name) do
-    path = [Access.key!(:players), Access.key!(:host), Access.key!(:name)]
+  def set_host(%GameState{} = state, %Player{} = player) do
+    path = [Access.key!(:players), Access.key!(:host)]
 
     state
-    |> put_in(path, name)
+    |> put_in(path, player)
     |> update_status()
   end
 
-  def set_guest(%GameState{} = state, name) do
-    path = [Access.key!(:players), Access.key!(:guest), Access.key!(:name)]
+  def set_guest(%GameState{} = state, %Player{} = player) do
+    path = [Access.key!(:players), Access.key!(:guest)]
 
     state
-    |> put_in(path, name)
+    |> put_in(path, player)
     |> update_status()
   end
 
-  def set_choice(state, player, choice) when (player in @valid_roles) and (choice in @valid_choices) do
+  def set_choice(state, role, choice) when (role in @valid_roles) and (choice in @valid_choices) do
     players_status = players_status(state)
 
     if players_status == :players_ready do
-      path = [Access.key!(:players), Access.key!(player), Access.key!(:choice)]
+      path = [Access.key!(:choices), Access.key!(role)]
 
       state
       |> put_in(path, choice)
@@ -70,9 +69,7 @@ defmodule RockPaperScissors.GameState do
   defp update_status_using(state, :choices), do: state
 
   defp run_rules(%GameState{status: :choices_ready} = state) do
-    choices = choices(state)
-
-    winner = case choices do
+    winner = case state.choices do
       %{host: :rock , guest: :paper} ->     :guest
       %{host: :rock , guest: :scissors} ->  :host
 
@@ -102,15 +99,11 @@ defmodule RockPaperScissors.GameState do
   end
 
   defp choices_status(state) do
-    case choices(state) do
+    case state.choices do
       %{host: :none, guest: :none}  -> :waiting_choices
       %{guest: :none} -> :waiting_guest_choice
       %{host: :none} -> :waiting_host_choice
       %{host: _, guest: _} -> :choices_ready
     end
-  end
-
-  defp choices(state) do
-    %{ host: state.players.host.choice, guest: state.players.guest.choice }
   end
 end
