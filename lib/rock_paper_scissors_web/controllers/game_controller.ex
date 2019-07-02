@@ -1,8 +1,9 @@
 defmodule RockPaperScissorsWeb.GameController do
   use RockPaperScissorsWeb, :controller
 
-  import Routes, only: [session_path: 2]
+  import Routes
   alias RockPaperScissors.GameServer
+  alias RockPaperScissorsWeb.ErrorView
 
   plug :authorize_user
 
@@ -12,7 +13,7 @@ defmodule RockPaperScissorsWeb.GameController do
     render(conn, "new.html", user_name: user_name)
   end
 
-  def create(conn, %{"game" => game} = params) do
+  def create(conn, %{"game" => game}) do
     user_name = get_session(conn, :current_user)
     game_name = game["name"]
 
@@ -38,7 +39,34 @@ defmodule RockPaperScissorsWeb.GameController do
       state = GameServer.state(game)
       json(conn, state)
     else
-      text(conn, "Game not found")
+      conn
+      |> put_view(ErrorView)
+      |> render("404.html")
+    end
+  end
+
+  def join(conn, %{"id" => game_name}) do
+    user_name = get_session(conn, :current_user)
+    game = RockPaperScissors.find_game(game_name)
+
+    if game do
+      if GameServer.status(game) == :missing_guest do
+        GameServer.set_guest(game, user_name)
+        conn
+        |> redirect(to: game_path(conn, :show, game_name))
+        |> halt()
+
+      else
+        conn
+        |> put_flash(:error, "Can't join game #{game_name} as guest")
+        |> redirect(to: "/")
+        |> halt()
+      end
+
+    else
+      conn
+      |> put_view(ErrorView)
+      |> render("404.html")
     end
   end
 
