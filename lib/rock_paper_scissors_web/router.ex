@@ -20,7 +20,7 @@ defmodule RockPaperScissorsWeb.Router do
     get "/", GameController, :new
 
     resources "/games", GameController, only: [:new, :create, :show]
-    get "/games/:id/join", GameController, :join
+    post "/games/join", GameController, :join, as: :game
 
     resources "/sessions", SessionController, only: [:new, :create, :delete], singleton: true
   end

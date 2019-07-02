@@ -1,5 +1,4 @@
 <h2>Create Game</h2>
-
 <%= form_for @conn, game_path(@conn, :create), [as: :game], fn f -> %>
   <label>
     Name:
@@ -10,4 +9,16 @@
   </label>
   <%= submit "Create" %>
 
+<% end %>
+
+
+<h2>Join Existing Game</h2>
+<%= form_for @conn, game_path(@conn, :join), [as: :game], fn f -> %>
+  <label>
+    Name:
+    <%= text_input f, :name,
+                      placeholder: "some_existing_game",
+                      required: true %>
+  </label>
+  <%= submit "Join" %>
 <% end %>

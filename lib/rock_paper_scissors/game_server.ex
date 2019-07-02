@@ -40,6 +40,14 @@ defmodule RockPaperScissors.GameServer do
     state(game_pid) |> Map.get(:winner)
   end
 
+  def players_ids(game_pid) do
+      game_pid
+      |> state()
+      |> Map.get(:players)
+      |> Map.values()
+      |> Enum.map(& &1.id)
+  end
+
   def choose(game_pid, role, choice) do
     GenServer.call(game_pid, {:choose, role, choice})
   end

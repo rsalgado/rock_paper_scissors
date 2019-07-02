@@ -9,17 +9,18 @@ defmodule RockPaperScissorsWeb.GameController do
 
 
   def new(conn, _params) do
-    user_name = get_session(conn, :current_user)
-    render(conn, "new.html", user_name: user_name)
+    player = get_session(conn, :current_user)
+    render(conn, "new.html", user_name: player.name)
   end
 
   def create(conn, %{"game" => game}) do
-    user_name = get_session(conn, :current_user)
+    player = get_session(conn, :current_user)
     game_name = game["name"]
 
     case RockPaperScissors.new_game(game_name) do
       {:ok, game} ->
-        GameServer.set_host(game, user_name)
+        GameServer.set_host(game, player)
+
         conn
         |> put_flash(:info, "Game #{game_name} created correctly")
         |> redirect(to: Routes.game_path(conn, :show, game_name))
@@ -28,30 +29,38 @@ defmodule RockPaperScissorsWeb.GameController do
       {:error, reason} ->
         conn
         |> put_flash(:error, reason)
-        |> render("new.html", user_name: user_name)
+        |> render("new.html", user_name: player.name)
     end
   end
 
   def show(conn, %{"id" => game_name}) do
     game = RockPaperScissors.find_game(game_name)
 
-    if game do
+    if game && game_player?(game, conn) do
       state = GameServer.state(game)
       json(conn, state)
     else
       conn
       |> put_view(ErrorView)
-      |> render("404.html")
+      |> render("401.html")
     end
   end
 
-  def join(conn, %{"id" => game_name}) do
-    user_name = get_session(conn, :current_user)
+  defp game_player?(game, conn) do
+    player_id = get_session(conn, :current_user).id
+    players_ids = GameServer.players_ids(game)
+
+    player_id in players_ids
+  end
+
+  def join(conn, %{"game" => %{"name" => game_name}}) do
+    player = get_session(conn, :current_user)
     game = RockPaperScissors.find_game(game_name)
 
     if game do
       if GameServer.status(game) == :missing_guest do
-        GameServer.set_guest(game, user_name)
+        GameServer.set_guest(game, player)
+
         conn
         |> redirect(to: game_path(conn, :show, game_name))
         |> halt()

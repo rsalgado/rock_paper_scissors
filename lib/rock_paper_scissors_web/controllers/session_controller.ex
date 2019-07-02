@@ -1,5 +1,6 @@
 defmodule RockPaperScissorsWeb.SessionController do
   use RockPaperScissorsWeb, :controller
+  alias RockPaperScissors.Player
 
   def new(conn, _params) do
     render(conn, "new.html")
@@ -7,12 +8,15 @@ defmodule RockPaperScissorsWeb.SessionController do
 
   def create(conn, %{"user" => user}) do
     return_path = get_session(conn, :return_to)
-    user_name = user["name"]
+    player = %Player{
+      name: user["name"],
+      id: RockPaperScissors.random_alphanumeric()
+    }
 
     conn
     |> delete_session(:return_to)
-    |> put_session(:current_user, user_name)
-    |> put_flash(:info, "Welcome #{user_name}")
+    |> put_session(:current_user, player)
+    |> put_flash(:info, "Welcome #{player.name}")
     |> redirect(to: return_path)
     |> halt()
   end
