@@ -1,4 +1,11 @@
 defmodule RockPaperScissorsWeb.UserSocket do
+  @moduledoc """
+  This is the only socket module. When trying to connect to this socket, it expects a
+  valid token as part of the payload map. i.e: `%{"token" => token}`. Where the `token`
+  must be a `%Player{}` struct corresponding to the user (player) trying to connect.
+  Remember that the salt must match the one used for signing: `"user socket"` in this case.
+  """
+
   use Phoenix.Socket
   require Logger
 

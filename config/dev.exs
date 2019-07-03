@@ -7,7 +7,12 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :rock_paper_scissors, RockPaperScissorsWeb.Endpoint,
-  http: [port: 4000],
+  http: [
+    port: 4000,
+    protocol_options: [
+      idle_timeout: 600_000 # 10 minutes before Cowboy closes the connection
+    ]
+  ],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,

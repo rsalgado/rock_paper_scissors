@@ -1,4 +1,10 @@
 defmodule RockPaperScissorsWeb.GameChannel do
+  @moduledoc """
+  This is channel module for games. Join this channel using topics of the form:
+  `"games:<game_name>"`. No payload is expected to join but there must be a `:player`
+  in the socket's assigns that should have been set up when connecting to the socket.
+  """
+
   use RockPaperScissorsWeb, :channel
   alias RockPaperScissors.GameServer
 
@@ -10,43 +16,45 @@ defmodule RockPaperScissorsWeb.GameChannel do
 
     # Authorize joining if the player is a guest or a host and update the assigns
     if role in [:host, :guest] do
-      socket =  
+      socket =
         socket
         |> assign(:game, game)
         |> assign(:role, role)
-
-      reply = %{players: GameServer.players(game), role: socket.assigns.role}
+      # Build the initial reply payload and send it
+      reply = %{
+        role: socket.assigns.role,
+        players: GameServer.players(game),
+        status: GameServer.status(game)
+      }
 
       {:ok, reply, socket}
+    
+    # Otherwise, prevent the player from joining to this channel
     else
       {:error, %{reason: "unauthorized"}}
     end
   end
 
-  # def handle_in("choose", %{"choice" => choice}, socket) do
-  #   # Extract paramaters for choosing
-  #   game = socket.assigns.game
-  #   role = socket.assigns.role
-  #   choice_atom = String.to_existing_atom(choice)
-  #   # Make choice with parameters
-  #   new_state = RockPaperScissors.GameServer.choose(game, role, choice_atom)
-  #   # Broadcast the new game state to players
-  #   broadcast(socket, "update_state", %{"state" => new_state})
 
-  #   # Broadcast the final status (all details) of the game if it is finished
-  #   if new_state == :finished do
-  #     status = RockPaperScissors.GameServer.status(game)
-  #     broadcast(socket, "final_status", status)
-  #   end
+  @doc """
+  Handle `"choice"` messages/events. This doesn't reply, but performs broadcasts.
+  """
+  def handle_in("choose", %{"choice" => choice}, socket) do
+    # Get data necessary for choosing
+    choice_atom = String.to_existing_atom(choice)
+    game = socket.assigns.game
+    role = socket.assigns.role
+    # Make choice and get the new server's state
+    state = GameServer.choose(game, role, choice_atom)
+    
+    # Broadcast the new status
+    broadcast(socket, "status_update", %{status: state.status})
+    # If the game is finished, broadcast `"game_finished"` event with the full game's state
+    if state.status == :finished do
+      broadcast(socket, "game_finished", state)
+    end
 
-  #   {:noreply, socket}
-  # end
-
-
-  # Channels can be used in a request/response fashion
-  # by sending replies to requests from the client
-  def handle_in("ping", payload, socket) do
-    {:reply, {:ok, payload}, socket}
+    {:noreply, socket}
   end
 
 end
