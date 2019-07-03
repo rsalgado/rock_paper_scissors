@@ -1,8 +1,7 @@
 defmodule RockPaperScissors.GameServer do
   use GenServer
 
-  alias RockPaperScissors.GameState
-  alias RockPaperScissors.GamesRegistry
+  alias RockPaperScissors.{GameState, GamesRegistry, Player}
 
   # Client API
 
@@ -40,12 +39,18 @@ defmodule RockPaperScissors.GameServer do
     state(game_pid) |> Map.get(:winner)
   end
 
-  def players_ids(game_pid) do
-      game_pid
-      |> state()
-      |> Map.get(:players)
-      |> Map.values()
-      |> Enum.map(& &1.id)
+  def player_role(game_pid, %Player{id: player_id} = _player) do
+    %{guest: guest, host: host} = players(game_pid)
+
+    cond do
+      player_id == host.id ->   :host
+      player_id == guest.id ->  :guest
+      _otherwise = true ->      nil
+    end
+  end
+
+  def players(game_pid) do
+      state(game_pid) |> Map.get(:players)
   end
 
   def choose(game_pid, role, choice) do

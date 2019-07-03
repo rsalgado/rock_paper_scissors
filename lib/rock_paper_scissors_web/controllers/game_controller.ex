@@ -34,12 +34,11 @@ defmodule RockPaperScissorsWeb.GameController do
   end
 
   def show(conn, %{"id" => game_name}) do
+    player = get_session(conn, :current_user)
     game = RockPaperScissors.find_game(game_name)
 
     if game && game_player?(game, conn) do
-      state = GameServer.state(game)
-
-      render(conn, "show.html", game_name: game_name)
+      render(conn, "show.html", game_name: game_name, user_name: player.name)
     else
       conn
       |> put_view(ErrorView)
@@ -48,10 +47,8 @@ defmodule RockPaperScissorsWeb.GameController do
   end
 
   defp game_player?(game, conn) do
-    player_id = get_session(conn, :current_user).id
-    players_ids = GameServer.players_ids(game)
-
-    player_id in players_ids
+    player = get_session(conn, :current_user)
+    GameServer.player_role(game, player) in [:guest, :host]
   end
 
   def join(conn, %{"game" => %{"name" => game_name}}) do

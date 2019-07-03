@@ -5,6 +5,7 @@ defmodule RockPaperScissorsWeb.UserSocket do
   ## Channels
   channel "games:*", RockPaperScissorsWeb.GameChannel
 
+
   def connect(%{"token" => token}, socket, _connect_info) do
     one_week = 60 * 60 * 24 * 7
     

@@ -5,31 +5,23 @@ defmodule RockPaperScissorsWeb.GameChannel do
 
   def join("games:"<>game_name, _payload, socket) do
     game = RockPaperScissors.find_game(game_name)
-    socket = assign(socket, :game, game)
+    player = socket.assigns[:player]
+    role = GameServer.player_role(game, player)
 
-    if authorized?(socket) do
-      {:ok, socket}
+    # Authorize joining if the player is a guest or a host and update the assigns
+    if role in [:host, :guest] do
+      socket =  
+        socket
+        |> assign(:game, game)
+        |> assign(:role, role)
+
+      reply = %{players: GameServer.players(game), role: socket.assigns.role}
+
+      {:ok, reply, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
   end
-
-  # def join("game:"<>game_name, %{"role" => role}, socket) do
-  #   if valid_role?(role) do
-  #     # Set up the socket assign values before setting them
-  #     role_atom = String.to_existing_atom(role)
-  #     game = RockPaperScissors.find_game(game_name)
-  #     # Set assigns for the game (pid) and user role
-  #     socket =
-  #       socket
-  #       |> assign(:game, game)
-  #       |> assign(:role, role_atom)
-
-  #     {:ok, socket}
-  #   else
-  #     {:error, %{reason: "invalid role"}}
-  #   end
-  # end
 
   # def handle_in("choose", %{"choice" => choice}, socket) do
   #   # Extract paramaters for choosing
@@ -57,11 +49,4 @@ defmodule RockPaperScissorsWeb.GameChannel do
     {:reply, {:ok, payload}, socket}
   end
 
-  # Add authorization logic here as required.
-  defp authorized?(socket) do
-    game = socket.assigns.game
-    player = socket.assigns.player
-    
-    player.id in GameServer.players_ids(game)
-  end
 end
