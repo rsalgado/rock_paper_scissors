@@ -19,4 +19,4 @@ import "phoenix_html"
 import socket from "./socket"
 import Game from "./game"
 
-Game.init(socket, document.querySelector("#game-app"))
+Game.init(socket, document.querySelector("#game"))

@@ -22,7 +22,7 @@
           </ul>
         </nav>
 
-        <h1>Header</h1>
+        <h1><%= link "Rock, Paper, Scissors", to: "/" %></h1>
         <!-- <a href="http://phoenixframework.org/" class="phx-logo">
           <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
         </a> -->

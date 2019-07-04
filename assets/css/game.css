@@ -1,0 +1,49 @@
+#game * {
+  box-sizing: border-box;
+}
+
+.choice-row {
+  margin: 5rem 0;
+}
+
+.choices-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 40rem;
+}
+
+.choice-block {
+  font-size: 2rem;
+  display: flex;
+  border-radius: 5%;
+  background: #f4f4f4;
+  width: 12rem;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.chosen {
+  background: #2c79b8;
+  color: #f4f4f4;
+}
+
+.choice-icon {
+  flex-grow: 1;
+  font-size: 400%;
+  line-height: 125%;
+  text-align: center;
+}
+
+.choice-icon.rock {
+  transform: scaleX(-1);
+}
+.choice-icon.scissors {
+  transform: scale(-1.25) rotate(90deg);
+}
+
+.choice-text {
+  text-transform: capitalize;
+  text-align: center;
+  font-weight: bold;
+}
