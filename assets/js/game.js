@@ -1,3 +1,99 @@
+import Vue from "vue/dist/vue.esm.js"
+
+
+let createVueApp = (socket, rootElement) => {
+  socket.connect()
+  let gameName = document.querySelector("#game").getAttribute("data-game-name")
+  let channel = socket.channel(`games:${gameName}`)
+
+  let app = new Vue({
+    el: rootElement,
+    data: {
+      messageText: "",
+      name: gameName,
+      choice: null,
+      role: null,
+      status: null,
+      winner: null,
+      players: {
+        guest: {},
+        host: {}
+      }
+    },
+
+    created() {
+      // Join the channel
+      channel.join()
+        .receive("ok", resp => {
+          console.log(`Joined the channel "games:${gameName}" successfully`)
+          // Update the local state
+          this.name = gameName
+          this.role = resp.role
+          this.players = resp.players
+          this.status = resp.status
+          this.messageText = this.messageForStatus(this.status)
+        })
+        .receive("error", resp => {
+          console.log("Error joining the channel", resp)
+        })
+
+      channel.on("status_update", payload =>  this.updateStatus(payload))
+      channel.on("game_finished", payload => this.finishGame(payload))
+    },
+
+    methods: {
+      /** Make choice (i.e. "rock") as the current user */
+      choose(choice) {
+        channel.push("choose", {choice})
+        this.choice = choice
+      },
+
+      /** This function will be called when the receiving a status update */
+      updateStatus({status}) {
+        this.status = status
+        console.log(`New status: "${status}"`)
+        this.messageText = this.messageForStatus(status)
+      },
+
+      finishGame(state) {
+        this.winner = state.winner
+        this.messageText = `Game finished!. Winner is: ${state.winner}`
+
+        let otherPlayerRole = this.role === "host" ? "guest" : "host"
+        let otherPlayer = this.players[otherPlayerRole]
+        let yourChoice = state.choices[this.role]
+        let theirChoice = state.choices[otherPlayerRole]
+    
+        if (state.winner === "tie") {
+          this.messageText = `You are tied with ${otherPlayer.name}. Both chose "${yourChoice}"`
+        }
+        else if (state.winner === this.role) {
+          this.messageText = `You are the winner with "${yourChoice}". ${otherPlayer.name} lost with "${theirChoice}"`
+        }
+        else {
+          this.messageText = `You lost with "${yourChoice}". ${otherPlayer.name} is the winner with "${theirChoice}". `
+        }
+      },
+
+      messageForStatus(status) {
+        switch (status) {
+          case null:  return "Starting game..."
+          case "missing_guest": return "Waiting for guest to join"
+          case "missing_host":  return "Waiting for host to join"
+          case "waiting_choices": return "Waiting for players to make their choices"
+          case "waiting_host_choice": return "Waiting for host to choose"
+          case "waiting_guest_choice":  return "Waiting for guest to choose"
+          case "finished":  return "Game finished! Waiting for more details..."
+          default:  return "Invalid state"
+        }
+      }
+    },
+  })
+
+  window.app = app
+}
+
+
 let Game = {
   // Game data (status) useful for client-side tasks.
   // It was not necessary define these properties here, but I did it anyway for explicitness.
@@ -83,4 +179,4 @@ let Game = {
 // TODO: Remove this when done. This is only for development purposes
 window.Game = Game
 
-export default Game
+export {Game, createVueApp}

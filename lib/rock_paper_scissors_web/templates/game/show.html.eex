@@ -1,25 +1,31 @@
-<h2>Game <span class="game-name"><%= @game_name %></span></h2>
-
 <%= content_tag(:div, id: "game", data: [game_name: @game_name]) do %>
   <div class="app">
+
+    <h2>Game <span class="game-name">{{name}}</span></h2>
 
     <div class="choice-row">
       <h3>Your choice:</h3>
       <div class="choices-group">
         <!-- Rock choice block -->
-        <div class="choice-block">
+        <div  class="choice-block" 
+              v-on:click="choose('rock')"
+              v-bind:class="{chosen: choice == 'rock'}">
           <div class="choice-icon rock">&#x1f91c;</div>
           <div class="choice-text">rock</div>
         </div>
 
         <!-- Paper choice block -->
-        <div class="choice-block chosen">
+        <div  class="choice-block" 
+              v-on:click="choose('paper')"
+              v-bind:class="{chosen: choice == 'paper'}">
           <div class="choice-icon paper">&#x270b;</div>
           <div class="choice-text">paper</div>
         </div>
 
         <!-- Scissors choice block -->
-        <div class="choice-block">
+        <div  class="choice-block" 
+              v-on:click="choose('scissors')"
+              v-bind:class="{chosen: choice == 'scissors'}">
           <div class="choice-icon scissors">&#x270c;</div>
           <div class="choice-text">scissors</div>
         </div>
@@ -31,6 +37,11 @@
       <div class="choices-group">
         Put choices here...
       </div>
+    </div>
+
+
+    <div class="alert alert-info">
+      <div>Status: {{messageText}}</div>
     </div>
   </div>
 

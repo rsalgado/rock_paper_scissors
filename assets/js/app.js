@@ -17,6 +17,10 @@ import "phoenix_html"
 // import socket from "./socket"
 
 import socket from "./socket"
-import Game from "./game"
+import {createVueApp} from "./game"
 
-Game.init(socket, document.querySelector("#game"))
+//Game.init(socket, document.querySelector("#game"))
+
+let vueAppElement = document.querySelector("#game .app")
+if (vueAppElement)
+  createVueApp(socket, vueAppElement)
