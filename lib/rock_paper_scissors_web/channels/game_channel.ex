@@ -20,15 +20,21 @@ defmodule RockPaperScissorsWeb.GameChannel do
         socket
         |> assign(:game, game)
         |> assign(:role, role)
+
+      # Schedule broadcast with "status_update" event to force existing player's status to update
+      send(self(), :on_join)
+
       # Build the initial reply payload and send it
       reply = %{
         role: socket.assigns.role,
         players: GameServer.players(game),
-        status: GameServer.status(game)
+        status: GameServer.status(game),
+        winner: GameServer.winner(game),
+        choices: GameServer.choices(game)
       }
 
       {:ok, reply, socket}
-    
+
     # Otherwise, prevent the player from joining to this channel
     else
       {:error, %{reason: "unauthorized"}}
@@ -46,13 +52,21 @@ defmodule RockPaperScissorsWeb.GameChannel do
     role = socket.assigns.role
     # Make choice and get the new server's state
     state = GameServer.choose(game, role, choice_atom)
-    
+
     # Broadcast the new status
     broadcast(socket, "status_update", %{status: state.status})
     # If the game is finished, broadcast `"game_finished"` event with the full game's state
     if state.status == :finished do
       broadcast(socket, "game_finished", state)
     end
+
+    {:noreply, socket}
+  end
+
+  def handle_info(:on_join, socket) do
+    game = socket.assigns.game
+    status = GameServer.status(game)
+    broadcast(socket, "status_update", %{status: status})
 
     {:noreply, socket}
   end

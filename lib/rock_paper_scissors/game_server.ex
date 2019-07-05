@@ -39,6 +39,10 @@ defmodule RockPaperScissors.GameServer do
     state(game_pid) |> Map.get(:winner)
   end
 
+  def choices(game_pid) do
+    state(game_pid) |> Map.get(:choices)
+  end
+
   def player_role(game_pid, %Player{id: player_id} = _player) do
     %{guest: guest, host: host} = players(game_pid)
 

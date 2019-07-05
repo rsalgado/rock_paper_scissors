@@ -6,6 +6,11 @@
   margin: 5rem 0;
 }
 
+.grayed {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .choices-group {
   display: flex;
   flex-direction: row;

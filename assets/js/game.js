@@ -11,13 +11,16 @@ let createVueApp = (socket, rootElement) => {
     data: {
       messageText: "",
       name: gameName,
-      choice: null,
       role: null,
       status: null,
       winner: null,
       players: {
         guest: {},
         host: {}
+      },
+      choices: {
+        guest: null,
+        host: null
       }
     },
 
@@ -31,6 +34,8 @@ let createVueApp = (socket, rootElement) => {
           this.role = resp.role
           this.players = resp.players
           this.status = resp.status
+          this.winner = resp.winner
+          this.choices = resp.choices
           this.messageText = this.messageForStatus(this.status)
         })
         .receive("error", resp => {
@@ -41,11 +46,24 @@ let createVueApp = (socket, rootElement) => {
       channel.on("game_finished", payload => this.finishGame(payload))
     },
 
+    computed: {
+      choicesEnabled() {
+        let waitingChoices = this.status === "waiting_choices"
+        let waitingMeAsHost = this.status === "waiting_host_choice" && this.role === "host"
+        let waitingMeAsGuest = this.status === "waiting_guest_choice" && this.role === "guest"
+        return waitingChoices || waitingMeAsHost || waitingMeAsGuest
+      },
+
+      otherPlayerRole() {
+        return this.role === "host" ? "guest" : "host"
+      }
+    },
+
     methods: {
       /** Make choice (i.e. "rock") as the current user */
       choose(choice) {
         channel.push("choose", {choice})
-        this.choice = choice
+        this.choices[this.role] = choice
       },
 
       /** This function will be called when the receiving a status update */
@@ -57,9 +75,9 @@ let createVueApp = (socket, rootElement) => {
 
       finishGame(state) {
         this.winner = state.winner
-        this.messageText = `Game finished!. Winner is: ${state.winner}`
+        this.choices = state.choices
 
-        let otherPlayerRole = this.role === "host" ? "guest" : "host"
+        let otherPlayerRole = this.otherPlayerRole
         let otherPlayer = this.players[otherPlayerRole]
         let yourChoice = state.choices[this.role]
         let theirChoice = state.choices[otherPlayerRole]
@@ -83,98 +101,27 @@ let createVueApp = (socket, rootElement) => {
           case "waiting_choices": return "Waiting for players to make their choices"
           case "waiting_host_choice": return "Waiting for host to choose"
           case "waiting_guest_choice":  return "Waiting for guest to choose"
-          case "finished":  return "Game finished! Waiting for more details..."
+          case "finished":  return "Game finished!"
           default:  return "Invalid state"
         }
       }
     },
   })
 
+  let choiceRow = Vue.component('choice-row', {
+    props: {'title': String, 'choice': String, 'enabled': Boolean},
+    template: "#choice-row-template",
+    methods: {
+      select(choice) {
+        if (!this.enabled) { return }
+        this.$emit("selection", choice)
+      }
+    }
+  })
+
   window.app = app
 }
 
-
-let Game = {
-  // Game data (status) useful for client-side tasks.
-  // It was not necessary define these properties here, but I did it anyway for explicitness.
-  data: {
-    name: null,
-    role: null,
-    status: null,
-    players: {
-      guest: {},
-      host: {}
-    }
-  },
-  channel: null,
-
-  /** Initialize the Game object. 
-    * Establish the connection to the socket and join the channel.
-    * Initialize the data properties
-    * Add event handlers for channel messages/events
-  */
-  init(socket, gameElement) {
-    if (!gameElement) { return }
-
-    socket.connect()
-    let gameName = gameElement.getAttribute("data-game-name")
-    let channel = socket.channel(`games:${gameName}`)
-    
-    // Join the channel
-    channel.join()
-      .receive("ok", resp => {
-        console.log(`Joined the channel "games:${gameName}" successfully`)
-        // Update the Game's local state
-        this.channel = channel
-        this.data.name = gameName
-        this.data.role = resp.role
-        this.data.players = resp.players
-        this.data.status = resp.status
-      })
-      .receive("error", resp => {
-        console.log("Error joining the channel", resp)
-      })
-
-    // Register callbacks
-    // NOTE:  Notice I used lambdas wrapping the calls here instead of passing the callbacks directly.
-    //        That's because `this` wouldn't be bound to this Game object if I pass the callback functions.
-    channel.on("status_update", payload => this.onStatusUpdate(payload))
-    channel.on("game_finished", payload => this.onGameFinished(payload))
-  },
-
-  /** Make choice (i.e. "rock") as the current user */
-  choose(choice) {
-      this.channel.push("choose", {choice})
-  },
-
-  // Callbacks
-
-  /** This function will be called when the receiving a status update */
-  onStatusUpdate({status}) {
-    this.data.status = status
-    console.log(`New status: "${status}"`)
-  },
-
-  /** This function will be called when receiving a notification of the game being finished. */
-  onGameFinished(state) {
-    console.log(`Game finished!. Winner is: ${state.winner}`)
-
-    let otherPlayerRole = this.data.role === "host" ? "guest" : "host"
-    let otherPlayer = this.data.players[otherPlayerRole]
-    let yourChoice = state.choices[this.data.role]
-    let theirChoice = state.choices[otherPlayerRole]
-
-    if (state.winner === "tie") {
-      console.log(`You are tied with ${otherPlayer.name}. Both chose "${yourChoice}"`)
-    }
-    else if (state.winner === this.data.role) {
-      console.log(`You are the winner with "${yourChoice}". ${otherPlayer.name} lost with "${theirChoice}"`)
-    }
-    else {
-      console.log(`You lost with "${yourChoice}". ${otherPlayer.name} is the winner with "${theirChoice}". `)
-    }
-  },
-}
 
 // TODO: Remove this when done. This is only for development purposes
 window.Game = Game
