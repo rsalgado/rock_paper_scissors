@@ -2,6 +2,15 @@
   box-sizing: border-box;
 }
 
+.game-name {
+  font-family: monospace;
+  font-size: 115%;
+  background: #f0f0f0;
+  padding: 1rem;
+  margin-left: 1rem;
+  border-radius: 10%;
+}
+
 .choice-row {
   margin: 5rem 0;
 }
@@ -22,7 +31,7 @@
   font-size: 2rem;
   display: flex;
   border-radius: 5%;
-  background: #f4f4f4;
+  background: #f0f0f0;
   width: 12rem;
   flex-direction: column;
   align-items: stretch;

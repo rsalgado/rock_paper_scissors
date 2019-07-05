@@ -3,22 +3,22 @@
 
     <h2>Game <span class="game-name">{{name}}</span></h2>
 
-    <choice-row v-bind:enabled="choicesEnabled"
+    <choice-group v-bind:enabled="choicesEnabled"
                 title="Your choice:"
                 v-bind:choice="choices[role]"
-                v-on:selection="choose"></choice-row>
+                v-on:selection="choose"></choice-group>
 
-    <choice-row title="Your opponent's choice:"
-                v-bind:choice="choices[otherPlayerRole]"></choice-row>
+    <choice-group title="Your opponent's choice:"
+                v-bind:choice="opponent.choice"></choice-group>
 
     <div class="alert alert-info">
-      <div>Status: {{messageText}}</div>
+      <div><b>Status:</b> {{messageText}}</div>
     </div>
   </div>
 <% end %>
 
 
-<template id="choice-row-template">
+<template id="choice-group-template">
   <div class="choice-row" v-bind:class="{'grayed': !enabled}">
     <h3>{{title}}</h3>
     <div class="choices-group">

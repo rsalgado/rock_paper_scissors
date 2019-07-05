@@ -2,10 +2,25 @@ import Vue from "vue/dist/vue.esm.js"
 
 
 let createVueApp = (socket, rootElement) => {
+  // Connect to socket
   socket.connect()
+  // Fetch the game's name from element attribute, and use it to build the channel's topic
   let gameName = document.querySelector("#game").getAttribute("data-game-name")
   let channel = socket.channel(`games:${gameName}`)
 
+  // This is the code for the <choice-group> component
+  let choiceGroup = Vue.component('choice-group', {
+    template: "#choice-group-template",
+    props: {'title': String, 'choice': String, 'enabled': Boolean},
+    methods: {
+      select(choice) {
+        if (!this.enabled) { return }
+        this.$emit("selection", choice)
+      }
+    }
+  })
+
+  // This is the code of the main (root) Vue instance
   let app = new Vue({
     el: rootElement,
     data: {
@@ -47,6 +62,7 @@ let createVueApp = (socket, rootElement) => {
     },
 
     computed: {
+      /** Determine whether the user can perform choices */
       choicesEnabled() {
         let waitingChoices = this.status === "waiting_choices"
         let waitingMeAsHost = this.status === "waiting_host_choice" && this.role === "host"
@@ -54,8 +70,14 @@ let createVueApp = (socket, rootElement) => {
         return waitingChoices || waitingMeAsHost || waitingMeAsGuest
       },
 
-      otherPlayerRole() {
-        return this.role === "host" ? "guest" : "host"
+      /** Get the opponent's info in a single object struct for convenience */
+      opponent() {
+        let result = {}
+        result.role = this.role === "host" ? "guest" : "host"
+        result.name = this.players[result.role].name
+        result.choice = this.choices[result.role]
+
+        return result
       }
     },
 
@@ -73,57 +95,40 @@ let createVueApp = (socket, rootElement) => {
         this.messageText = this.messageForStatus(status)
       },
 
-      finishGame(state) {
-        this.winner = state.winner
-        this.choices = state.choices
-
-        let otherPlayerRole = this.otherPlayerRole
-        let otherPlayer = this.players[otherPlayerRole]
-        let yourChoice = state.choices[this.role]
-        let theirChoice = state.choices[otherPlayerRole]
-    
-        if (state.winner === "tie") {
-          this.messageText = `You are tied with ${otherPlayer.name}. Both chose "${yourChoice}"`
-        }
-        else if (state.winner === this.role) {
-          this.messageText = `You are the winner with "${yourChoice}". ${otherPlayer.name} lost with "${theirChoice}"`
-        }
-        else {
-          this.messageText = `You lost with "${yourChoice}". ${otherPlayer.name} is the winner with "${theirChoice}". `
-        }
+      /** This method is to be run when the game finishes and the corresponding event is sent from the channel */
+      finishGame({status, winner, choices, players}) {
+        this.status = status
+        this.winner = winner
+        this.choices = choices
+        this.players = players
+        this.messageText = this.messageForStatus(status)
       },
 
+      /** Helper function to provide a descriptive message, given a game status */
       messageForStatus(status) {
         switch (status) {
+          default:  return "Invalid state"
           case null:  return "Starting game..."
           case "missing_guest": return "Waiting for guest to join"
           case "missing_host":  return "Waiting for host to join"
           case "waiting_choices": return "Waiting for players to make their choices"
           case "waiting_host_choice": return "Waiting for host to choose"
           case "waiting_guest_choice":  return "Waiting for guest to choose"
-          case "finished":  return "Game finished!"
-          default:  return "Invalid state"
+          case "finished":
+            let yourChoice = this.choices[this.role]
+            if (this.winner === "tie")
+              return `You are tied with ${this.opponent.name}. Both chose "${yourChoice}"`
+            else if (this.winner === this.role)
+              return `You are the winner with "${yourChoice}". ${this.opponent.name} lost with "${this.opponent.choice}"`
+            else
+              return `You lost with "${yourChoice}". ${this.opponent.name} is the winner with "${this.opponent.choice}"`
         }
       }
     },
   })
 
-  let choiceRow = Vue.component('choice-row', {
-    props: {'title': String, 'choice': String, 'enabled': Boolean},
-    template: "#choice-row-template",
-    methods: {
-      select(choice) {
-        if (!this.enabled) { return }
-        this.$emit("selection", choice)
-      }
-    }
-  })
-
+  // TODO: Remove this when done, as it only for development purposes to play on the browser's console
   window.app = app
 }
 
-
-// TODO: Remove this when done. This is only for development purposes
-window.Game = Game
-
-export {Game, createVueApp}
+export {createVueApp}
