@@ -1,18 +1,19 @@
 <h2>Create Game</h2>
-<%= form_for @conn, game_path(@conn, :create), [as: :game], fn f -> %>
-  <label>
-    Name:
-    <%= text_input f, :name,
-                      placeholder: "some_random_name",
-                      required: true,
-                      autofocus: true %>
-  </label>
+<p>
+  Create a new game as the <b>host</b> and pass the game's name to your opponent
+  to join the game as <b>guest</b>.
+</p>
+
+<%= form_for @conn, game_path(@conn, :create), fn f -> %>
   <%= submit "Create" %>
-
 <% end %>
-
+<br/>
 
 <h2>Join Existing Game</h2>
+<p>
+  Join an existing game as <b>guest</b> using the games's name given to you by the <b>host</b>.
+</p>
+
 <%= form_for @conn, game_path(@conn, :join), [as: :game], fn f -> %>
   <label>
     Name:

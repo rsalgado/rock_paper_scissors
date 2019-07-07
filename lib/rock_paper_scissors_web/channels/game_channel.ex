@@ -7,7 +7,7 @@ defmodule RockPaperScissorsWeb.GameChannel do
 
   use RockPaperScissorsWeb, :channel
   alias RockPaperScissors.GameServer
-
+  require Logger
 
   def join("games:"<>game_name, _payload, socket) do
     game = RockPaperScissors.find_game(game_name)
@@ -22,7 +22,9 @@ defmodule RockPaperScissorsWeb.GameChannel do
         |> assign(:role, role)
 
       # Schedule broadcast with "status_update" event to force existing player's status to update
+      # Also, schedule the game to be stopped after 10 minutes of its creation
       send(self(), :on_join)
+      Process.send_after(self(), :stop_game, 600_000)
 
       # Build the initial reply payload and send it
       reply = %{
@@ -71,4 +73,11 @@ defmodule RockPaperScissorsWeb.GameChannel do
     {:noreply, socket}
   end
 
+  def handle_info(:stop_game, socket) do
+    game_name = GameServer.name(socket.assigns.game)
+    :ok = RockPaperScissors.stop_game(game_name)
+    Logger.info("Game #{game_name} stopped")
+
+    {:noreply, socket}
+  end
 end

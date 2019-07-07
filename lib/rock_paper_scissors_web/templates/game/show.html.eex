@@ -2,6 +2,8 @@
   <div class="app">
 
     <h2>Game <span class="game-name">{{name}}</span></h2>
+    <p>If you are the host, pass this game's name to your opponent to join as a guest.</p>
+    <p>Remember that this game will be <b>destroyed after 10 minutes</b> of its creation (whether is finished or not).</p>
 
     <choice-group title="Your choice:"
                   :enabled="choicesEnabled"
