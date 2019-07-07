@@ -29,6 +29,10 @@ let createVueApp = (socket, rootElement) => {
       }
     },
 
+    computed: {
+      isWinnersRow() { return this.role === this.winner },
+    },
+
     methods: {
       select(choice) {
         if (!this.enabled) { return }

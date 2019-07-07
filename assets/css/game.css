@@ -4,20 +4,15 @@
 
 .game-name {
   font-family: monospace;
-  font-size: 115%;
+  font-size: 110%;
   background: #f0f0f0;
   padding: 1rem;
   margin-left: 1rem;
   border-radius: 10%;
 }
 
-.choice-row {
+.choices-row {
   margin: 5rem 0;
-}
-
-.grayed {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .choices-group {
@@ -27,13 +22,18 @@
   padding: 1rem;
   max-width: 36rem;
   min-width: 32rem;
+  cursor: default;
 }
-
-.choices-group.winner {
-  background: #97cf7c;
-  border-radius: 1rem;
-
-}
+  .choices-group.-grayed {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transition: opacity 0.4s ease-out;
+  }
+  .choices-group.-winner {
+    background: #97cf7c;
+    border-radius: 1rem;
+    transition: background 0.4s ease-out;
+  }
 
 .choice-block {
   font-size: 2rem;
@@ -44,28 +44,26 @@
   flex-direction: column;
   align-items: stretch;
 }
+  .choice-block.-chosen {
+    background: #2c79b8;
+    color: #f4f4f4;
+  }
 
-.chosen {
-  background: #2c79b8;
-  color: #f4f4f4;
-}
+  .choice-block > .icon {
+    flex-grow: 1;
+    font-size: 250%;
+    line-height: 125%;
+    text-align: center;
+  }
+    .icon.rock {
+      transform: scaleX(-1);
+    }
+    .icon.scissors {
+      transform: scale(-1.25) rotate(90deg);
+    }
 
-.choice-icon {
-  flex-grow: 1;
-  font-size: 250%;
-  line-height: 125%;
-  text-align: center;
-}
-
-.choice-icon.rock {
-  transform: scaleX(-1);
-}
-.choice-icon.scissors {
-  transform: scale(-1.25) rotate(90deg);
-}
-
-.choice-text {
-  text-transform: capitalize;
-  text-align: center;
-  font-weight: bold;
-}
+  .choice-block > .text {
+    text-transform: capitalize;
+    text-align: center;
+    font-weight: bold;
+  }
