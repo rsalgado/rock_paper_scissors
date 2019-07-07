@@ -4,12 +4,16 @@
     <h2>Game <span class="game-name">{{name}}</span></h2>
 
     <choice-group v-bind:enabled="choicesEnabled"
-                title="Your choice:"
-                v-bind:choice="choices[role]"
-                v-on:selection="choose"></choice-group>
+                  title="Your choice:"
+                  v-bind:role="role"
+                  v-bind:winner="winner"
+                  v-bind:choice="choices[role]"
+                  v-on:selection="choose"></choice-group>
 
     <choice-group title="Your opponent's choice:"
-                v-bind:choice="opponent.choice"></choice-group>
+                  v-bind:role="opponent.role"
+                  v-bind:winner="winner"
+                  v-bind:choice="opponent.choice"></choice-group>
 
     <div class="alert alert-info">
       <div><b>Status:</b> {{messageText}}</div>
@@ -19,31 +23,17 @@
 
 
 <template id="choice-group-template">
-  <div class="choice-row" v-bind:class="{'grayed': !enabled}">
+  <div class="choice-row">
     <h3>{{title}}</h3>
-    <div class="choices-group">
-      <!-- Rock choice block -->
-      <div  class="choice-block"
-            v-on:click="select('rock')"
-            v-bind:class="{chosen: choice == 'rock'}">
-        <div class="choice-icon rock">&#x1f91c;</div>
-        <div class="choice-text">rock</div>
-      </div>
-
-      <!-- Paper choice block -->
-      <div  class="choice-block"
-            v-on:click="select('paper')"
-            v-bind:class="{chosen: choice == 'paper'}">
-        <div class="choice-icon paper">&#x270b;</div>
-        <div class="choice-text">paper</div>
-      </div>
-
-      <!-- Scissors choice block -->
-      <div  class="choice-block"
-            v-on:click="select('scissors')"
-            v-bind:class="{chosen: choice == 'scissors'}">
-        <div class="choice-icon scissors">&#x270c;</div>
-        <div class="choice-text">scissors</div>
+    <div class="choices-group" v-bind:class="{grayed: !enabled, winner: role === winner}">
+      <!-- Choice blocks for each of the possible options -->
+      <div  class="choice-block" v-for="option in options"
+            v-on:click="select(option.name)"
+            v-bind:class="{chosen: choice == option.name}">
+        <!-- Icon -->
+        <div class="choice-icon" v-bind:class="option.name">{{option.icon}}</div>
+        <!-- Name -->
+        <div class="choice-text">{{option.name}}</div>
       </div>
     </div>
   </div>

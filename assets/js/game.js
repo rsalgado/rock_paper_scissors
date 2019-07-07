@@ -11,7 +11,24 @@ let createVueApp = (socket, rootElement) => {
   // This is the code for the <choice-group> component
   let choiceGroup = Vue.component('choice-group', {
     template: "#choice-group-template",
-    props: {'title': String, 'choice': String, 'enabled': Boolean},
+    props: {
+      title: String,
+      choice: String,
+      enabled: Boolean,
+      role: String,
+      winner: String
+    },
+
+    data() {
+      return {
+        options: [
+          {name: "rock", icon: "🤜"}, 
+          {name: "paper", icon: "✋"},
+          {name: "scissors", icon: "✌"}
+        ]
+      }
+    },
+
     methods: {
       select(choice) {
         if (!this.enabled) { return }
