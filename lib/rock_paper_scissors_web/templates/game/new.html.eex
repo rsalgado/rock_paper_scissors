@@ -4,7 +4,7 @@
   to join the game as <b>guest</b>.
 </p>
 
-<%= form_for @conn, game_path(@conn, :create), fn f -> %>
+<%= form_for @conn, game_path(@conn, :create), fn _f -> %>
   <%= submit "Create" %>
 <% end %>
 <br/>

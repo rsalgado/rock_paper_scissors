@@ -22,18 +22,14 @@ defmodule RockPaperScissors.GameState do
   @valid_choices [:none, :rock, :paper, :scissors]
 
   def set_host(%GameState{} = state, %Player{} = player) do
-    path = [Access.key!(:players), Access.key!(:host)]
-
-    state
-    |> put_in(path, player)
+    state.players.host
+    |> put_in(player)
     |> update_status()
   end
 
   def set_guest(%GameState{} = state, %Player{} = player) do
-    path = [Access.key!(:players), Access.key!(:guest)]
-
-    state
-    |> put_in(path, player)
+    state.players.guest
+    |> put_in(player)
     |> update_status()
   end
 
