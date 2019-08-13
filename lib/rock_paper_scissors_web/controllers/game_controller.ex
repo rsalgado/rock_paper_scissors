@@ -48,7 +48,7 @@ defmodule RockPaperScissorsWeb.GameController do
   def show(conn, %{"id" => game_name}, player) do
     game = RockPaperScissors.find_game(game_name)
 
-    if game && game_player?(game, conn) do
+    if game && game_player?(game, player) do
       render(conn, "show.html", game_name: game_name, user_name: player.name)
     else
       conn
@@ -58,8 +58,7 @@ defmodule RockPaperScissorsWeb.GameController do
   end
 
   # Check whether the current user is a player/member of the game
-  defp game_player?(game, conn) do
-    player = get_session(conn, :current_user)
+  defp game_player?(game, player) do
     GameServer.player_role(game, player) in [:guest, :host]
   end
 

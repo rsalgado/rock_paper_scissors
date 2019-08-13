@@ -74,9 +74,8 @@ defmodule RockPaperScissors.GameServer do
 
   @impl true
   def init(game_name) do
-    initial_status = %GameState{name: game_name}
-
-    {:ok, initial_status}
+    initial_state = %GameState{name: game_name}
+    {:ok, initial_state}
   end
 
   @impl true
