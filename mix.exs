@@ -9,7 +9,15 @@ defmodule RockPaperScissors.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+
+      # Docs
+      name: "Rock, Paper, Scissors",
+      source_url: "https://github.com/rsalgado/rock_paper_scissors",
+      docs: [
+        main: "readme",
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -38,7 +46,8 @@ defmodule RockPaperScissors.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
     ]
   end
 end

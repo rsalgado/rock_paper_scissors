@@ -1,8 +1,10 @@
 defmodule RockPaperScissorsWeb.GameChannel do
   @moduledoc """
   This is channel module for games. Join this channel using topics of the form:
-  `"games:<game_name>"`. No payload is expected to join but there must be a `:player`
-  in the socket's assigns that should have been set up when connecting to the socket.
+  `"games:<game_name>"`.
+  No payload is expected to join, but there must be a `:player` in the socket's
+  assigns that should have been set up when connecting to the socket
+  (`RockPaperScissorsWeb.UserSocket.connect/3`).
   """
 
   use RockPaperScissorsWeb, :channel

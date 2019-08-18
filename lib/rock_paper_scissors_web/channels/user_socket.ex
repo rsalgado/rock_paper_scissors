@@ -2,7 +2,7 @@ defmodule RockPaperScissorsWeb.UserSocket do
   @moduledoc """
   This is the only socket module. When trying to connect to this socket, it expects a
   valid token as part of the payload map. i.e: `%{"token" => token}`. Where the `token`
-  must be a `%Player{}` struct corresponding to the user (player) trying to connect.
+  must be a [`%Player{}`](`RockPaperScissors.Player`) struct corresponding to the user (player) trying to connect.
   Remember that the salt must match the one used for signing: `"user socket"` in this case.
   """
 
@@ -15,7 +15,7 @@ defmodule RockPaperScissorsWeb.UserSocket do
 
   def connect(%{"token" => token}, socket, _connect_info) do
     one_week = 60 * 60 * 24 * 7
-    
+
     case Phoenix.Token.verify(socket, "user socket", token, max_age: one_week) do
       {:ok, player} ->
         {:ok, assign(socket, :player, player)}

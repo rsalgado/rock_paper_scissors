@@ -1,4 +1,9 @@
 defmodule RockPaperScissors.GameState do
+  @moduledoc """
+  A struct for handling a game's state. The module also includes basic functions for
+  manipulating the state and updating the game's status (not to be confused with state).
+  """
+
   require Logger
   alias RockPaperScissors.Player
   alias __MODULE__
@@ -21,18 +26,27 @@ defmodule RockPaperScissors.GameState do
   @valid_roles [:guest, :host]
   @valid_choices [:none, :rock, :paper, :scissors]
 
+  @doc """
+  Set the host player (and update the game's status)
+  """
   def set_host(%GameState{} = state, %Player{} = player) do
     state.players.host
     |> put_in(player)
     |> update_status()
   end
 
+  @doc """
+  Set the guest player (and update the game's status)
+  """
   def set_guest(%GameState{} = state, %Player{} = player) do
     state.players.guest
     |> put_in(player)
     |> update_status()
   end
 
+  @doc """
+  Make a choice for a given role (and update the game's status)
+  """
   def set_choice(state, role, choice) when (role in @valid_roles) and (choice in @valid_choices) do
     players_status = players_status(state)
 
@@ -48,6 +62,13 @@ defmodule RockPaperScissors.GameState do
     end
   end
 
+  @doc """
+  Update the game's status. This is called by other functions implicitly.
+
+  It recalculates and sets the status first checking if the users are ready as a first stage,
+  then if the choices have been made as a second stage, and, finally, running the rules
+  as a final stage.
+  """
   def update_status(%GameState{} = state) do
     state
     |> update_status_using(:players)
