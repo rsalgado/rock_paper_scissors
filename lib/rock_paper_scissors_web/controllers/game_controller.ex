@@ -1,4 +1,8 @@
 defmodule RockPaperScissorsWeb.GameController do
+  @moduledoc """
+  Phoenix controller for dealing with games, i.e.: creating, joining and showing them.
+  """
+
   use RockPaperScissorsWeb, :controller
 
   import Routes

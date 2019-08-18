@@ -1,11 +1,21 @@
 defmodule RockPaperScissorsWeb.SessionController do
+  @moduledoc """
+  Phoenix controller for handling sessions: signing in and out.
+  """
+
   use RockPaperScissorsWeb, :controller
   alias RockPaperScissors.Player
 
+  @doc """
+  Render the form for creating a new session (signing in)
+  """
   def new(conn, _params) do
     render(conn, "new.html")
   end
 
+  @doc """
+  Create the session, adding the player as `:current_user`
+  """
   def create(conn, %{"user" => user}) do
     return_path = get_session(conn, :return_to)
     player = %Player{
@@ -21,6 +31,9 @@ defmodule RockPaperScissorsWeb.SessionController do
     |> halt()
   end
 
+  @doc """
+  Clear the data stored in the session
+  """
   def delete(conn, _params) do
     conn
     |> delete_session(:current_user)
