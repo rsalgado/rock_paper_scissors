@@ -60,66 +60,44 @@ defmodule RockPaperScissors.GameStateTest do
     end
 
     test "rock & paper", %{state: state} do
-      new_state =
-        state
-        |> GameState.set_choice(:host, :rock)
-        |> GameState.set_choice(:guest, :paper)
+      new_state = set_choices(state, :rock, :paper)
       assert new_state.winner == :guest
 
-      new_state =
-        state
-        |> GameState.set_choice(:host, :paper)
-        |> GameState.set_choice(:guest, :rock)
+      new_state = set_choices(state, :paper, :rock)
       assert new_state.winner == :host
     end
 
     test "paper & scissors", %{state: state} do
-      new_state =
-        state
-        |> GameState.set_choice(:host, :paper)
-        |> GameState.set_choice(:guest, :scissors)
+      new_state = set_choices(state, :paper, :scissors)
       assert new_state.winner == :guest
 
-      new_state =
-        state
-        |> GameState.set_choice(:host, :scissors)
-        |> GameState.set_choice(:guest, :paper)
+      new_state = set_choices(state, :scissors, :paper)
       assert new_state.winner == :host
     end
 
     test "scissors & rock", %{state: state} do
-      new_state =
-        state
-        |> GameState.set_choice(:host, :scissors)
-        |> GameState.set_choice(:guest, :rock)
+      new_state = set_choices(state, :scissors, :rock)
       assert new_state.winner == :guest
 
-      new_state =
-        state
-        |> GameState.set_choice(:host, :rock)
-        |> GameState.set_choice(:guest, :scissors)
+      new_state = set_choices(state, :rock, :scissors)
       assert new_state.winner == :host
     end
 
     test "ties", %{state: state} do
-      new_state =
-        state
-        |> GameState.set_choice(:host, :rock)
-        |> GameState.set_choice(:guest, :rock)
+      new_state = set_choices(state, :rock, :rock)
       assert new_state.winner == :tie
 
-      new_state =
-        state
-        |> GameState.set_choice(:host, :paper)
-        |> GameState.set_choice(:guest, :paper)
+      new_state = set_choices(state, :paper, :paper)
       assert new_state.winner == :tie
 
-      new_state =
-        state
-        |> GameState.set_choice(:host, :scissors)
-        |> GameState.set_choice(:guest, :scissors)
+      new_state = set_choices(state, :scissors, :scissors)
       assert new_state.winner == :tie
     end
   end
 
+  defp set_choices(state, host_choice, guest_choice) do
+    state
+    |> GameState.set_choice(:host, host_choice)
+    |> GameState.set_choice(:guest, guest_choice)
+  end
 end
