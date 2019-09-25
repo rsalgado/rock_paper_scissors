@@ -3,6 +3,7 @@ defmodule RockPaperScissors.GameStateTest do
   alias RockPaperScissors.GameState
   alias RockPaperScissors.Player
 
+
   test "set_host/2: Setting a valid host" do
     state = %GameState{}
     player = %Player{id: "1234", name: "John Doe"}
@@ -23,32 +24,61 @@ defmodule RockPaperScissors.GameStateTest do
     assert new_state.status == :missing_host
   end
 
-  test "set_choice/3: Setting valid choices" do
-    host = %Player{name: "Homer"}
-    guest = %Player{name: "Gavin"}
-    state =
-      %GameState{}
-      |> GameState.set_host(host)
-      |> GameState.set_guest(guest)
 
-    assert state.choices.host == :none
-    assert state.choices.guest == :none
-    assert state.status == :waiting_choices
+  describe "set_choice/3: Setting choices" do
+    setup do
+      host = %Player{name: "Homer"}
+      guest = %Player{name: "Gavin"}
+      state = %GameState{}
+              |> GameState.set_host(host)
+              |> GameState.set_guest(guest)
 
-    new_state = GameState.set_choice(state, :host, :rock)
-    assert new_state.choices.host == :rock
-    assert new_state.status == :waiting_guest_choice
+      {:ok, state: state}
+    end
 
-    new_state = GameState.set_choice(state, :guest, :paper)
-    assert new_state.choices.guest == :paper
-    assert new_state.status == :waiting_host_choice
+    test "Initial state", %{state: state} do
+      assert state.choices.host == :none
+      assert state.choices.guest == :none
+      assert state.status == :waiting_choices
+    end
 
-    new_state =
-      state
-      |> GameState.set_choice(:host, :paper)
-      |> GameState.set_choice(:guest, :scissors)
-    assert new_state.status == :finished
+    test "Setting host's choice", %{state: state} do
+      new_state = GameState.set_choice(state, :host, :rock)
+      assert new_state.choices.host == :rock
+      assert new_state.status == :waiting_guest_choice
+    end
+
+    test "Setting guest's choice", %{state: state} do
+      new_state = GameState.set_choice(state, :guest, :paper)
+      assert new_state.choices.guest == :paper
+      assert new_state.status == :waiting_host_choice
+    end
+
+    test "Setting host's and guest's choices", %{state: state} do
+      new_state =
+        state
+        |> GameState.set_choice(:host, :paper)
+        |> GameState.set_choice(:guest, :scissors)
+      assert new_state.status == :finished
+    end
+
+    test "Setting invalid choices", %{state: state} do
+      assert_raise FunctionClauseError, fn ->
+        GameState.set_choice(state, :host, :foo)
+      end
+      assert_raise FunctionClauseError, fn ->
+        GameState.set_choice(state, :guest, :foo)
+      end
+    end
+
+    test "Setting invalid role", %{state: state} do
+      assert_raise FunctionClauseError, fn ->
+        GameState.set_choice(state, :foo, :rock)
+      end
+    end
+
   end
+
 
   describe "Game rules" do
     setup do
@@ -94,6 +124,7 @@ defmodule RockPaperScissors.GameStateTest do
       assert new_state.winner == :tie
     end
   end
+
 
   defp set_choices(state, host_choice, guest_choice) do
     state
