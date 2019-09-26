@@ -13,21 +13,48 @@ defmodule RockPaperScissors.GameServerTest do
     assert GameServer.status(game_pid) == :missing_players
 
     GameServer.set_guest(game_pid, %Player{name: "Alice"})
+    assert GameServer.status(game_pid) == :missing_host
+
+    GameServer.set_host(game_pid, %Player{name: "Bob"})
+    assert GameServer.status(game_pid) == :waiting_choices
+
+    GameServer.choose(game_pid, :guest, :rock)
+    assert GameServer.status(game_pid) == :waiting_host_choice
+
+    GameServer.choose(game_pid, :host, :paper)
+    assert GameServer.status(game_pid) == :finished
   end
 
   test "winner/1: Get a game's winner" do
     {:ok, game_pid} = GameServer.start_link("MyTestGame")
     assert GameServer.winner(game_pid) == nil
+
+    GameServer.set_host(game_pid, %Player{name: "Alice"})
+    GameServer.set_guest(game_pid, %Player{name: "Bob"})
+    GameServer.choose(game_pid, :host, :paper)
+    GameServer.choose(game_pid, :guest, :scissors)
+    assert GameServer.winner(game_pid) == :guest
   end
 
   test "choices/1: Get a game's choices" do
     {:ok, game_pid} = GameServer.start_link("MyTestGame")
     assert GameServer.choices(game_pid) == %{host: :none, guest: :none}
+
+    GameServer.set_host(game_pid, %Player{name: "Bob"})
+    GameServer.set_guest(game_pid, %Player{name: "Alice"})
+    GameServer.choose(game_pid, :host, :rock)
+    GameServer.choose(game_pid, :guest, :scissors)
+    assert GameServer.choices(game_pid) == %{host: :rock, guest: :scissors}
   end
 
   test "players/1: Get a game's players" do
     {:ok, game_pid} = GameServer.start_link("MyTestGame")
     assert GameServer.players(game_pid) == %{host: %Player{}, guest: %Player{}}
+
+    [host, guest] = [%Player{name: "Alice", id: "12"}, %Player{name: "Bob", id: "34"}]
+    GameServer.set_host(game_pid, host)
+    GameServer.set_guest(game_pid, guest)
+    assert %{host: ^host, guest: ^guest} = GameServer.players(game_pid)
   end
 
   test "state/1: Get a game's state" do
@@ -65,7 +92,6 @@ defmodule RockPaperScissors.GameServerTest do
     GameServer.set_host(game_pid, host)
     GameServer.choose(game_pid, :guest, :rock)
     GameServer.choose(game_pid, :host, :paper)
-
     assert GameServer.choices(game_pid) == %{guest: :rock, host: :paper}
   end
 
