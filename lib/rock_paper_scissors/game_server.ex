@@ -102,15 +102,15 @@ defmodule RockPaperScissors.GameServer do
   @doc """
   Set the game's host player
   """
-  def set_host(game_pid, name) do
-    GenServer.call(game_pid, {:set_host, name})
+  def set_host(game_pid, player) do
+    GenServer.call(game_pid, {:set_host, player})
   end
 
   @doc """
   Set the game's guest player
   """
-  def set_guest(game_pid, name) do
-    GenServer.call(game_pid, {:set_guest, name})
+  def set_guest(game_pid, player) do
+    GenServer.call(game_pid, {:set_guest, player})
   end
 
 
@@ -134,14 +134,14 @@ defmodule RockPaperScissors.GameServer do
   end
 
   @impl true
-  def handle_call({:set_host, name}, _from, game_state) do
-    new_state = GameState.set_host(game_state, name)
+  def handle_call({:set_host, player}, _from, game_state) do
+    new_state = GameState.set_host(game_state, player)
     {:reply, new_state, new_state}
   end
 
   @impl true
-  def handle_call({:set_guest, name}, _from, game_state) do
-    new_state = GameState.set_guest(game_state, name)
+  def handle_call({:set_guest, player}, _from, game_state) do
+    new_state = GameState.set_guest(game_state, player)
     {:reply, new_state, new_state}
   end
 end
