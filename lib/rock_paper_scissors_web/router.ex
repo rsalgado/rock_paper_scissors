@@ -7,7 +7,7 @@ defmodule RockPaperScissorsWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :put_user_token
+    plug :put_user_token_and_assign
   end
 
   pipeline :api do
@@ -30,10 +30,12 @@ defmodule RockPaperScissorsWeb.Router do
   #   pipe_through :api
   # end
 
-  defp put_user_token(conn, _opts) do
+  defp put_user_token_and_assign(conn, _opts) do
     if current_user = get_session(conn, :current_user) do
       token = Phoenix.Token.sign(conn, "user socket", current_user)
-      assign(conn, :user_token, token)
+      conn
+      |> assign(:user_token, token)
+      |> assign(:current_user, current_user)
     else
       conn
     end

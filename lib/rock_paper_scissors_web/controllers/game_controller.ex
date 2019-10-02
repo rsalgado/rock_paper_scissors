@@ -13,7 +13,7 @@ defmodule RockPaperScissorsWeb.GameController do
 
   # Override default action plug to inject the player into the controller's actions
   def action(conn, _opts) do
-    player = get_session(conn, :current_user)
+    player = conn.assigns.current_user
     args = [conn, conn.params, player]
     apply(__MODULE__, action_name(conn), args)
   end
@@ -95,7 +95,7 @@ defmodule RockPaperScissorsWeb.GameController do
 
   # Plug for user authorization
   defp authorize_user(conn, _opts) do
-    if get_session(conn, :current_user) do
+    if conn.assigns[:current_user] do
       conn
     else
       conn
