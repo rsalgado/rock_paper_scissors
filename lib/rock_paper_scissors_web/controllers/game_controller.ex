@@ -56,6 +56,7 @@ defmodule RockPaperScissorsWeb.GameController do
       render(conn, "show.html", game_name: game_name, user_name: player.name)
     else
       conn
+      |> put_status(401)
       |> put_view(ErrorView)
       |> render("401.html")
     end
@@ -88,6 +89,7 @@ defmodule RockPaperScissorsWeb.GameController do
 
     else
       conn
+      |> put_status(404)
       |> put_view(ErrorView)
       |> render("404.html")
     end
