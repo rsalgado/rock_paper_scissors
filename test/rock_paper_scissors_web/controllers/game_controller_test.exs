@@ -2,7 +2,6 @@ defmodule RockPaperScissorsWeb.GameControllerTest do
   use RockPaperScissorsWeb.ConnCase
   alias RockPaperScissors.{Player, GameServer}
 
-  require IEx
 
   setup do
     # This will ensure that the application is started.
